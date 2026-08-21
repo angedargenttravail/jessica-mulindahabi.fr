@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jessica Mulindahabi — Peintre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     PALETTE & RÉGLAGES — c'est ici qu'on ajustera couleurs / espacements
+     ============================================================ */
+  :root{
+    --bg:        #F7F5F0;   /* fond "gesso", toile apprêtée */
+    --ink:       #17140F;   /* texte principal, noir chaud */
+    --ink-soft:  #6B665C;   /* texte secondaire */
+    --line:      rgba(23,20,15,0.14);
+    --accent:    #2C3B63;   /* bleu outremer — pigment de peintre */
+    --accent-2:  #B9542C;   /* terre de sienne brûlée, touche chaude */
+    --card-a:    #D8CBB8;   /* teintes des toiles-placeholder */
+    --card-b:    #A9B9AE;
+    --card-c:    #C9A98C;
+    --card-d:    #8E9AAE;
+    --card-e:    #C7846B;
+    --card-f:    #B7B09A;
+
+    --sidebar-w: 280px;
+    --gap: 28px;
+    --radius: 2px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    min-height:100vh;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+
+  .layout{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* ============================================================
+     SIDEBAR
+     ============================================================ */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex-shrink:0;
+    padding:48px 36px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border-right:1px solid var(--line);
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+
+  .brand h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:1.65rem;
+    line-height:1.2;
+    letter-spacing:-0.01em;
+  }
+
+  .brand .role{
+    margin-top:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+
+  nav{ margin-top:56px; }
+
+  nav ul{ list-style:none; }
+
+  nav li + li{ margin-top:18px; }
+
+  nav a{
+    font-size:0.98rem;
+    color:var(--ink-soft);
+    position:relative;
+    padding-left:0;
+    transition:color .25s ease, padding-left .25s ease;
+  }
+
+  nav a::before{
+    content:"";
+    position:absolute;
+    left:-18px; top:50%;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--accent-2);
+    transform:translateY(-50%) scale(0);
+    transition:transform .25s ease;
+  }
+
+  nav a:hover{ color:var(--ink); }
+
+  nav a.active{ color:var(--ink); font-weight:500; padding-left:18px; }
+  nav a.active::before{ transform:translateY(-50%) scale(1); }
+
+  .sidebar-footer{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.68rem;
+    color:var(--ink-soft);
+    line-height:1.7;
+  }
+
+  .sidebar-footer a:hover{ color:var(--accent); }
+
+  /* mobile top bar */
+  .mobile-bar{ display:none; }
+
+  /* ============================================================
+     MAIN
+     ============================================================ */
+  main{
+    flex:1;
+    padding:64px 64px 120px;
+    max-width:1180px;
+  }
+
+  section{ display:none; }
+  section.active{
+    display:block;
+    animation:fadeUp .5s ease both;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    section.active{ animation:none; }
+  }
+
+  .section-head{ margin-bottom:48px; max-width:640px; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent-2);
+    display:block;
+    margin-bottom:14px;
+  }
+
+  h2{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:2.4rem;
+    letter-spacing:-0.01em;
+  }
+
+  .section-head p{
+    margin-top:18px;
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    max-width:52ch;
+  }
+
+  /* ---------- Grille d'œuvres ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:var(--gap);
+  }
+
+  .artwork{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .canvas{
+    aspect-ratio:4/5;
+    border-radius:var(--radius);
+    position:relative;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.35), transparent 60%),
+      var(--tone, var(--card-a));
+    transition:transform .4s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .artwork:hover .canvas{ transform:translateY(-4px); }
+
+  .canvas::after{
+    content:"Remplacer par la photo de l'œuvre";
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    padding:16px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.66rem;
+    color:rgba(23,20,15,0.55);
+    background:rgba(247,245,240,0.0);
+    opacity:0;
+    transition:opacity .25s ease;
+  }
+  .artwork:hover .canvas::after{ opacity:1; background:rgba(247,245,240,0.55); }
+
+  .caption{
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+
+  .caption .title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.02rem;
+  }
+
+  .caption .meta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    color:var(--ink-soft);
+    letter-spacing:0.02em;
+  }
+
+  /* ---------- Séries ---------- */
+  .series-block + .series-block{
+    margin-top:64px;
+    padding-top:64px;
+    border-top:1px solid var(--line);
+  }
+
+  .series-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-bottom:26px;
+  }
+
+  .series-head h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:1.5rem;
+  }
+
+  .series-head span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    color:var(--ink-soft);
+  }
+
+  .series-desc{
+    max-width:60ch;
+    color:var(--ink-soft);
+    margin-bottom:26px;
+    font-size:0.96rem;
+  }
+
+  .series-row{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:18px;
+  }
+
+  .series-row .canvas{ aspect-ratio:1/1; }
+
+  /* ---------- À propos ---------- */
+  .about-grid{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:56px;
+    align-items:start;
+  }
+
+  .portrait{
+    aspect-ratio:4/5;
+    border-radius:var(--radius);
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255,255,255,0.3), transparent 60%),
+      var(--card-d);
+    position:relative;
+    overflow:hidden;
+  }
+  .portrait::after{
+    content:"Photo de Jessica";
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.68rem;
+    color:rgba(23,20,15,0.5);
+  }
+
+  .about-text p{ margin-bottom:18px; color:var(--ink); max-width:62ch; }
+  .about-text p.lead{
+    font-family:'Fraunces', serif;
+    font-size:1.3rem;
+    font-style:italic;
+    color:var(--ink);
+    margin-bottom:26px;
+  }
+
+  .about-lists{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:36px;
+    margin-top:36px;
+  }
+
+  .about-lists h4{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--accent-2);
+    margin-bottom:14px;
+  }
+
+  .about-lists ul{ list-style:none; }
+  .about-lists li{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+    padding:9px 0;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .about-lists li span:last-child{ color:var(--ink); text-align:right; }
+
+  .contact-line{
+    margin-top:40px;
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+
+  .contact-line a{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.82rem;
+    border-bottom:1px solid var(--ink);
+    padding-bottom:2px;
+    transition:color .2s ease, border-color .2s ease;
+  }
+  .contact-line a:hover{ color:var(--accent); border-color:var(--accent); }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 900px){
+    .grid{ grid-template-columns:repeat(2,1fr); }
+    .series-row{ grid-template-columns:repeat(2,1fr); }
+    .about-grid{ grid-template-columns:1fr; }
+    .portrait{ max-width:220px; }
+  }
+
+  @media (max-width: 768px){
+    .layout{ flex-direction:column; }
+    .sidebar{
+      display:none;
+    }
+    .mobile-bar{
+      display:flex;
+      position:sticky; top:0; z-index:10;
+      background:var(--bg);
+      border-bottom:1px solid var(--line);
+      padding:18px 24px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .mobile-bar h1{
+      font-family:'Fraunces', serif;
+      font-size:1.1rem;
+      font-weight:500;
+    }
+    .mobile-bar nav ul{
+      display:flex;
+      list-style:none;
+      gap:16px;
+    }
+    .mobile-bar nav a{
+      font-family:'IBM Plex Mono', monospace;
+      font-size:0.68rem;
+      text-transform:uppercase;
+      color:var(--ink-soft);
+    }
+    .mobile-bar nav a.active{ color:var(--accent-2); }
+    main{ padding:36px 22px 80px; }
+    h2{ font-size:1.85rem; }
+    .grid{ grid-template-columns:1fr 1fr; gap:16px; }
+  }
+
+  @media (max-width: 480px){
+    .grid{ grid-template-columns:1fr; }
+    .series-row{ grid-template-columns:1fr 1fr; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="mobile-bar">
+  <h1>Jessica Mulindahabi</h1>
+  <nav>
+    <ul>
+      <li><a href="#recent" class="nav-link active" data-target="recent">Peintures</a></li>
+      <li><a href="#series" class="nav-link" data-target="series">Séries</a></li>
+      <li><a href="#about" class="nav-link" data-target="about">À propos</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <h1>Jessica<br>Mulindahabi</h1>
+        <span class="role">Peintre · Huile &amp; acrylique</span>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#recent" class="nav-link active" data-target="recent">Dernières peintures</a></li>
+          <li><a href="#series" class="nav-link" data-target="series">Séries</a></li>
+          <li><a href="#about" class="nav-link" data-target="about">À propos de moi</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      Basée à Paris<br>
+      <a href="mailto:contact@jessica-mulindahabi.com">contact@jessica-mulindahabi.com</a><br>
+      <a href="#">Instagram ↗</a>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ============ DERNIÈRES PEINTURES ============ -->
+    <section id="recent" class="active">
+      <div class="section-head">
+        <span class="eyebrow">Atelier — 2026</span>
+        <h2>Dernières peintures</h2>
+        <p>Les travaux les plus récents, encore sentant la térébenthine. Mis à jour au fil des séances d'atelier.</p>
+      </div>
+
+      <div class="grid">
+        <article class="artwork">
+          <div class="canvas" style="--tone:var(--card-a)"></div>
+          <div class="caption">
+            <span class="title">Titre de l'œuvre</span>
+            <span class="meta">Huile sur toile · 80×100 cm · 2026</span>
+          </div>
+        </article>
+        <article class="artwork">
+          <div class="canvas" style="--tone:var(--card-b)"></div>
+          <div class="caption">
+            <span class="title">Titre de l'œuvre</span>
+            <span class="meta">Acrylique sur toile · 60×60 cm · 2026</span>
+          </div>
+        </article>
+        <article class="artwork">
+          <div class="canvas" style="--tone:var(--card-c)"></div>
+          <div class="caption">
+            <span class="title">Titre de l'œuvre</span>
+            <span class="meta">Huile sur bois · 40×50 cm · 2025</span>
+          </div>
+        </article>
+        <article class="artwork">
+          <div class="canvas" style="--tone:var(--card-d)"></div>
+          <div class="caption">
+            <span class="title">Titre de l'œuvre</span>
+            <span class="meta">Huile sur toile · 100×120 cm · 2025</span>
+          </div>
+        </article>
+        <article class="artwork">
+          <div class="canvas" style="--tone:var(--card-e)"></div>
+          <div class="caption">
+            <span class="title">Titre de l'œuvre</span>
+            <span class="meta">Acrylique sur papier · 30×40 cm · 2025</span>
+          </div>
+        </article>
+        <article class="artwork">
+          <div class="canvas" style="--tone:var(--card-f)"></div>
+          <div class="caption">
+            <span class="title">Titre de l'œuvre</span>
+            <span class="meta">Huile sur toile · 70×90 cm · 2025</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ SÉRIES ============ -->
+    <section id="series">
+      <div class="section-head">
+        <span class="eyebrow">Corpus de travail</span>
+        <h2>Séries</h2>
+        <p>Le travail organisé par cycles de recherche, chacun exploré sur plusieurs mois.</p>
+      </div>
+
+      <div class="series-block">
+        <div class="series-head">
+          <h3>Nom de la série I</h3>
+          <span>2025 — en cours · 8 œuvres</span>
+        </div>
+        <p class="series-desc">Décrivez ici l'intention de cette série : le point de départ, les couleurs et gestes récurrents, ce qu'elle cherche à raconter.</p>
+        <div class="series-row">
+          <div class="canvas" style="--tone:var(--card-a)"></div>
+          <div class="canvas" style="--tone:var(--card-c)"></div>
+          <div class="canvas" style="--tone:var(--card-e)"></div>
+          <div class="canvas" style="--tone:var(--card-b)"></div>
+        </div>
+      </div>
+
+      <div class="series-block">
+        <div class="series-head">
+          <h3>Nom de la série II</h3>
+          <span>2023 – 2024 · 12 œuvres</span>
+        </div>
+        <p class="series-desc">Une seconde série, avec sa propre note d'intention : la question plastique posée, la palette employée, le format de travail.</p>
+        <div class="series-row">
+          <div class="canvas" style="--tone:var(--card-d)"></div>
+          <div class="canvas" style="--tone:var(--card-f)"></div>
+          <div class="canvas" style="--tone:var(--card-a)"></div>
+          <div class="canvas" style="--tone:var(--card-c)"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ À PROPOS ============ -->
+    <section id="about">
+      <div class="section-head">
+        <span class="eyebrow">Portrait</span>
+        <h2>À propos de moi</h2>
+      </div>
+
+      <div class="about-grid">
+        <div class="portrait"></div>
+        <div class="about-text">
+          <p class="lead">Une phrase d'ouverture qui donne le ton : d'où vient votre peinture, ce qu'elle cherche.</p>
+          <p>Un premier paragraphe de présentation : parcours, formation, ce qui vous a amenée à la peinture. Deux à quatre phrases suffisent — on privilégie la clarté à l'exhaustivité.</p>
+          <p>Un second paragraphe, plus personnel : votre manière de travailler, votre atelier, ce qui nourrit votre pratique au quotidien.</p>
+
+          <div class="about-lists">
+            <div>
+              <h4>Expositions</h4>
+              <ul>
+                <li><span>2025</span><span>Nom de la galerie, Ville</span></li>
+                <li><span>2024</span><span>Nom de l'exposition, Ville</span></li>
+                <li><span>2023</span><span>Nom de l'exposition, Ville</span></li>
+              </ul>
+            </div>
+            <div>
+              <h4>Formation</h4>
+              <ul>
+                <li><span>20XX</span><span>Nom de l'école</span></li>
+                <li><span>20XX</span><span>Nom de la formation</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="contact-line">
+            <a href="mailto:contact@jessica-mulindahabi.com">contact@jessica-mulindahabi.com</a>
+            <a href="#">Instagram</a>
+            <a href="#">CV complet (PDF)</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('main > section');
+
+  function activate(target){
+    sections.forEach(s => s.classList.toggle('active', s.id === target));
+    links.forEach(l => l.classList.toggle('active', l.dataset.target === target));
+    history.replaceState(null, '', '#' + target);
+  }
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      activate(link.dataset.target);
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  // ouvrir directement sur l'onglet indiqué par l'URL si présent
+  const initial = window.location.hash.replace('#','');
+  if(initial && document.getElementById(initial)){
+    activate(initial);
+  }
+</script>
+
+</body>
+</html>
